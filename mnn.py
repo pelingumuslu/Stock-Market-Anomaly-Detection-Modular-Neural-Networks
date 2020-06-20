@@ -37,7 +37,7 @@ def SigmHiddenLayer(num,prevLayer):
 	return hiddenLayer
 	
 def OutputLayer(prevLayer):
-	outLayer = Dense(1,activation='softmax')(prevLayer)
+	outLayer = Dense(2,activation='softmax')(prevLayer)
 	return outLayer
 
 #Submodules
