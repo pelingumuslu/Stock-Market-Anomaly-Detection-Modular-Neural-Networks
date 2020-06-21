@@ -3,6 +3,7 @@
 from keras.optimizers import Adam
 from keras.metrics import categorical_crossentropy
 from keras.metrics import sparse_categorical_crossentropy
+from keras.metrics import sparse_categorical_accuracy
 from keras.utils import to_categorical
 from mnn import *
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
@@ -142,7 +143,7 @@ def runModels(train_x,train_y,test_x,test_y):
 def modelfit(Model,train_x,train_y,test_x,test_y):
 	Model.summary()
 	print("module summary has been published above")
-	Model.compile(optimizer=Adam(lr=0.001), loss='sparse_categorical_crossentropy', metrics=['sparse_categorical_accuracy'])
+	Model.compile(optimizer=Adam(lr=0.00001), loss='sparse_categorical_crossentropy', metrics=['categorical_accuracy'])
 	
 	#Model.compile(optimizer=Adam(lr=0.001), loss='sparse_categorical_crossentropy')
 	#Model.compile(optimizer=Adam(lr=0.0001), loss='categorical_crossentropy', metrics=['categorical_accuracy'])
@@ -153,7 +154,7 @@ def modelfit(Model,train_x,train_y,test_x,test_y):
 	Model.fit(train_x,train_y, epochs=20, batch_size=64,verbose=2,validation_split=0.2)
 	print("module has been fit above")
 	predict=Model.predict(test_x)
-	#result = Model.evaluate(test_x,test_y,verbose=2,batch_size=64)
+	result = Model.evaluate(test_x,test_y,verbose=2,batch_size=64)
 
 	return 
 
