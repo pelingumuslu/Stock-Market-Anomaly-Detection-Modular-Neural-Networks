@@ -32,8 +32,8 @@ def ReLuHiddenLayer(num,prevLayer):
 	hiddenLayer = Dense(num,activation='relu')(prevLayer)
 	return hiddenLayer
 
-def SigmHiddenLayer(num,prevLayer):
-	hiddenLayer = Dense(num,activation='sigmoid')(prevLayer)
+def SoftmaxHiddenLayer(num,prevLayer):
+	hiddenLayer = Dense(num,activation='softmax')(prevLayer)
 	return hiddenLayer
 	
 def OutputLayer(prevLayer):
@@ -68,10 +68,17 @@ def SubModule3(inputsize):
 	print("module 3 successfully created")
 	return module3
 	
-
-
+def gatingNet(inputsize):
+	inlayer=InputLayer(inputsize)
+	hidden1 = SoftmaxHiddenLayer(inputsize-1,inlayer)
+	hidden2 = SoftmaxHiddenLayer(inputsize-3,hidden1)
+	hidden3= SoftmaxHiddenLayer(inputsize-5,hidden2)
+	hidden4= SoftmaxHiddenLayer(inputsize-5,hidden3)
+	#might add hidden 4&5, prev layer of outlayer might be softmax too
+	out = 	outLayer = Dense(3,activation='softmax')(hidden4)#number of modules as the output number
+	gating = Model(inputs=inlayer,outputs=out)
+	return gating
 #prunning during training
-
 
 
 

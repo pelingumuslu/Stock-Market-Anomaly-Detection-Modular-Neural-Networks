@@ -2,7 +2,7 @@
 
 from keras.optimizers import Adam
 from keras.metrics import categorical_crossentropy
-from keras.metrics import sparse_categorical_crossentropy
+from keras.metrics import sparse_categorical_crossentropy,binary_crossentropy
 from keras.metrics import sparse_categorical_accuracy
 from keras.utils import to_categorical
 from mnn import *
@@ -20,6 +20,9 @@ from dataProcess import *
 
 #if Y(i)s are one-hot encoded then use sparse categorical loss function
 #if Y(i)s are integers then use categorical loss function
+
+import matplotlib
+import matplotlib.pylab as plt
 
 def train(train_x,train_y):
 	
@@ -117,16 +120,10 @@ def tr_model3(data):
 
 def runModels(train_x,train_y,test_x,test_y):
 	trainx1=tr_model1(train_x)
-	print("trainx1")
-	print(trainx1)
-	print(trainx1.shape)
 	trainx2=tr_model2(train_x)
 	trainx3=tr_model3(train_x)
 	
 	testx1=tr_model1(test_x)
-	print("testx1")
-	print(testx1)
-	print(testx1.shape)
 	testx2=tr_model2(test_x)
 	testx3=tr_model3(test_x)
 
@@ -134,30 +131,100 @@ def runModels(train_x,train_y,test_x,test_y):
 	module2=SubModule2(trainx2.shape[1])
 	module3=SubModule3(trainx3.shape[1])
 	
-	modelfit(module1,trainx1,train_y,testx1,test_y)	
-	modelfit(module2,trainx2,train_y,testx2,test_y)
-	modelfit(module3,trainx3,train_y,testx3,test_y)	
+	gate=gatingNet(train_x.shape[1])
+	
+	historyM1 = modelfit(module1,trainx1,train_y,testx1,test_y)	
+	historyM2 = modelfit(module2,trainx2,train_y,testx2,test_y)
+	historyM3 = modelfit(module3,trainx3,train_y,testx3,test_y)	
+	
+	historyGT = gatefit(gate,train_x,train_y,test_x,test_y)
+	
+	
+	
+	#connectAll(historyM1,historyM2,historyM3,historyGT)
 	
 	return
 	
+	
+def gatefit(Model,train_x,train_y,test_x,test_y):
+	
+	Model.summary()
+	print("gate module summary has been published above")
+	Model.compile(optimizer=Adam(lr=0.01), loss='sparse_categorical_crossentropy', metrics=['binary_crossentropy'])
+	
+	history = Model.fit(train_x,train_y, epochs=20, batch_size=128,verbose=2,validation_split=0.1)
+	
+	result = Model.evaluate(test_x,test_y,verbose=2,batch_size=128)
+	
+	
+	train_loss = history.history['loss']
+	val_loss   = history.history['val_loss']
+	train_acc  = history.history['binary_crossentropy']
+	#acc    = history.history['val_acc']
+	xc         = range(20)
+	
+
+	figure = plt.figure()
+	plt.xlabel("per epoch")
+	plt.ylabel("loss")
+	plt.plot(xc, train_loss,'r')
+	plt.plot(xc, val_loss,'b')
+	plt.legend()
+	plt.show()
+	
+	figure2 = plt.figure()
+	plt.xlabel("per epoch")
+	plt.ylabel("accuracy")
+	#plt.plot(xc, acc,'r')
+	plt.plot(xc,train_acc,'g')
+	plt.legend()
+	plt.show()
+	
+	
+	return
+	
+
+
 def modelfit(Model,train_x,train_y,test_x,test_y):
 	Model.summary()
 	print("module summary has been published above")
-	Model.compile(optimizer=Adam(lr=0.00001), loss='sparse_categorical_crossentropy', metrics=['categorical_accuracy'])
+	
+	
+	Model.compile(optimizer=Adam(lr=0.001), loss='sparse_categorical_crossentropy', metrics=['binary_crossentropy'])
 	
 	#Model.compile(optimizer=Adam(lr=0.001), loss='sparse_categorical_crossentropy')
 	#Model.compile(optimizer=Adam(lr=0.0001), loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 	
-	print("module has been successfully compiled above")
-	#train_y=to_categorical(train_y)
-	#print("train to categorical is successful")
-	Model.fit(train_x,train_y, epochs=20, batch_size=64,verbose=2,validation_split=0.2)
-	print("module has been fit above")
-	predict=Model.predict(test_x)
-	result = Model.evaluate(test_x,test_y,verbose=2,batch_size=64)
+	history = Model.fit(train_x,train_y, epochs=10, batch_size=128,verbose=2,validation_split=0.2)
 
-	return 
+	result = Model.evaluate(test_x,test_y,verbose=2,batch_size=128)
 
+	train_loss = history.history['loss']
+	val_loss   = history.history['val_loss']
+	train_acc  = history.history['binary_crossentropy']
+	#val_acc    = history.history['val_acc']
+	xc         = range(10)
 	
 	
+	figure = plt.figure()
+	plt.xlabel("per epoch")
+	plt.ylabel("loss")
+	plt.plot(xc, train_loss,'r')
+	plt.plot(xc, val_loss,'b')
+	plt.legend()
+	plt.show()
 	
+	figure2 = plt.figure()
+	plt.xlabel("per epoch")
+	plt.ylabel("accuracy")
+	#plt.plot(xc, acc,'r')
+	plt.plot(xc,train_acc,'g')
+	plt.legend()
+	plt.show()
+	
+	#output = K.sum(expert_outputs * K.repeat_elements(K.expand_dims(gating_outputs, axis=1), self.units, axis=1), axis=2)
+
+	return history 
+	
+
+
