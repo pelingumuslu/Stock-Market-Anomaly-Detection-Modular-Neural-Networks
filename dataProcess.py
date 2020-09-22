@@ -80,6 +80,10 @@ def readCsv():
 	
 	return dataWhole
 
+def normalize(data):
+	normalized_data = (data - meanValue(data))/ stdDev(data)
+	return normalized_data
+
 #string values are converted to integers
 def encoder(dataframe):
 	labelEncoder=LabelEncoder()
@@ -124,29 +128,72 @@ def Min(array):
 	return np.amin(array)
 
 def getAnomalyScores(data):
-	scores=np.array([])
+
+	print('mean: ' ,meanValue(data))
+	print('stdDev: ',stdDev(data))
 	
-	#z-Scores of each feature
+	scores=np.array([])
+	length=222#each row has 222 columnss
+	zScore=0
+	#result_txt=open("sum.txt","wt")
 	
 	for i in range(0,len(data)):
-		zScore=0
-		#inst sym exp d
-		zScore+=(data[i:i+1,4:5]-meanValue(strikePrice))/stdDev(strikePrice)
-		#opttype
-		zScore+=(data[i:i+1,6:7]-meanValue(openVal))/stdDev(openVal)
-		zScore+=(data[i:i+1,7:8]-meanValue(highVal))/stdDev(highVal)
-		zScore+=(data[i:i+1,8:9]-meanValue(lowVal))/stdDev(lowVal)
-		zScore+=(data[i:i+1,9:10]-meanValue(closeVal))/stdDev(closeVal)
-		zScore+=(data[i:i+1,10:11]-meanValue(settlePrice))/stdDev(settlePrice)
-		zScore+=(data[i:i+1,11:12]-meanValue(contracts))/stdDev(contracts)
-		zScore+=(data[i:i+1,12:13]-meanValue(valInlakh))/stdDev(valInlakh)
-		zScore+=(data[i:i+1,13:14]-meanValue(openInt))/stdDev(openInt)
-		zScore+=(data[i:i+1,14:15]-meanValue(changeInIO))/stdDev(changeInIO)
-		#timestamp
-		scores=np.append(scores,zScore/10)
+		zScore=(data[i:i+1,:])
+		summ=0
+		for j in range(0,length):
+			summ+=zScore[:,j:j+1]
+			
+		if (summ/222)<200:
+			scores=np.append(scores,0)
+			#result_txt.write(str(summ))
+			#result_txt.write("   0")
+
+		else:
+			scores=np.append(scores,1)
+			#result_txt.write(str(summ))
+			#result_txt.write("   1")
+		#result_txt.write("\n")
+	#result_txt.close()
 	return scores
+
+
+	"""
+	zScore+=(data[i:i+1,4:5]-meanValue(data))/stdDev(data)
+		#opttype
+		zScore+=(data[i:i+1,6:7]-meanValue(data))/stdDev(data)
+		zScore+=(data[i:i+1,7:8]-meanValue(data))/stdDev(data)
+		zScore+=(data[i:i+1,8:9]-meanValue(data))/stdDev(data)
+		zScore+=(data[i:i+1,9:10]-meanValue(data))/stdDev(data)
+		zScore+=(data[i:i+1,10:11]-meanValue(data))/stdDev(data)
+		zScore+=(data[i:i+1,11:12]-meanValue(data))/stdDev(data)
+		zScore+=(data[i:i+1,12:13]-meanValue(data))/stdDev(data)
+		zScore+=(data[i:i+1,13:14]-meanValue(data))/stdDev(data)
+		zScore+=(data[i:i+1,14:15]-meanValue(data))/stdDev(data)
+		#timestamp
+if zScore < 1:
+			scores=np.append(scores,0)
+		else:
+			scores=np.append(scores,1)
+
+	#inst sym exp date
+	zScore+=(data[i:i+1,4:5]-meanValue(strikePrice))/stdDev(strikePrice)
+	#opttype
+	zScore+=(data[i:i+1,6:7]-meanValue(openVal))/stdDev(openVal)
+	zScore+=(data[i:i+1,7:8]-meanValue(highVal))/stdDev(highVal)
+	zScore+=(data[i:i+1,8:9]-meanValue(lowVal))/stdDev(lowVal)
+	zScore+=(data[i:i+1,9:10]-meanValue(closeVal))/stdDev(closeVal)
+	zScore+=(data[i:i+1,10:11]-meanValue(settlePrice))/stdDev(settlePrice)
+	zScore+=(data[i:i+1,11:12]-meanValue(contracts))/stdDev(contracts)
+	zScore+=(data[i:i+1,12:13]-meanValue(valInlakh))/stdDev(valInlakh)
+	zScore+=(data[i:i+1,13:14]-meanValue(openInt))/stdDev(openInt)
+	zScore+=(data[i:i+1,14:15]-meanValue(changeInIO))/stdDev(changeInIO)
+	"""
+	#timestamp
 	
-"""	
+	#zScore+=(data[i:i+1,:]-meanValue(data))/stdDev(data)
+	#scores=np.append(scores,zScore)
+	
+	"""	
 	#mean values
 	chgIOmean=meanValue(changeInIO)
 	openIntmean=meanValue(openInt)
@@ -168,7 +215,7 @@ def getAnomalyScores(data):
 		scores=np.append(scores,anomalyScore(data[i:i+1,5:6],data[i:i+1,8:9],data[i:i+1,9:10],data[i:i+1,12:13],data[i:i+1,13:14],chgIOmean,openIntmean,setPrcmean,clsmean,opnmean,chgIOStd,openIntStd,opnStd,clsStd,setPrcStd))
 	return scores/100
 	#return anomalyScores
-"""
+	"""
 
 
 
